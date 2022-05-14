@@ -1,5 +1,6 @@
 const express = require("express");
 const redis = require("redis");
+const axios = require("axios");
 
 const util = require("util");
 
@@ -22,6 +23,23 @@ app.post("/", async (req, res) => {
   const response = await client.get(key, value);
   console.log("success");
   res.json(response);
+});
+
+app.get("/post/:id", async (req, res) => {
+  let { id } = req.params;
+
+  const cachedPost = await client.get(`post-${id}`);
+  if (cachedPost) {
+    console.log("cache hit");
+    return res.json(JSON.parse(cachedPost));
+  }
+
+  const response = await axios.get(
+    `https://jsonplaceholder.typicode.com/posts/${id}`
+  );
+  client.set(`post-${id}`, JSON.stringify(response.data));
+  console.log("cache miss");
+  return res.json(response.data);
 });
 
 app.listen(8080, () => {

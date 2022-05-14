@@ -37,7 +37,7 @@ app.get("/post/:id", async (req, res) => {
   const response = await axios.get(
     `https://jsonplaceholder.typicode.com/posts/${id}`
   );
-  client.set(`post-${id}`, JSON.stringify(response.data));
+  client.set(`post-${id}`, JSON.stringify(response.data), "EX", 6);
   console.log("cache miss");
   return res.json(response.data);
 });
